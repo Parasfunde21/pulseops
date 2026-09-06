@@ -19,10 +19,8 @@ export interface LoginUserInput {
 
 export interface SafeUser {
   id: string;
-  organizationId?: string;
   name: string;
   email: string;
-  role: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -39,30 +37,22 @@ export class EmailAlreadyRegisteredError extends Error {
 }
 
 function toSafeUser(user: UserDocument): SafeUser {
-  const organizationId = user.organizationId?.toString();
-
   return {
     id: user.id,
-    ...(organizationId === undefined ? {} : { organizationId }),
     name: user.name,
     email: user.email,
-    role: user.role,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
 }
 
 function createAccessToken(user: UserDocument): string {
-  const organizationId = user.organizationId?.toString();
-  const payload = {
-    ...(organizationId === undefined ? {} : { organizationId }),
-  };
   const options: SignOptions = {
     subject: user.id,
     expiresIn: env.jwtExpiresIn,
   };
 
-  return jwt.sign(payload, env.jwtSecret, options);
+  return jwt.sign({}, env.jwtSecret, options);
 }
 
 export async function registerUser(input: RegisterUserInput): Promise<AuthenticationResult> {

@@ -13,15 +13,7 @@ function identityFromPayload(payload: string | JwtPayload): AuthenticatedIdentit
     return null;
   }
 
-  const organizationId = payload.organizationId;
-  if (organizationId !== undefined && typeof organizationId !== 'string') {
-    return null;
-  }
-
-  return {
-    userId: payload.sub,
-    ...(organizationId === undefined ? {} : { organizationId }),
-  };
+  return { userId: payload.sub };
 }
 
 export const requireAuthentication: RequestHandler = (request, response, next) => {
