@@ -39,8 +39,22 @@ function parseDnsServer(value: string | undefined): string {
   return dnsServer;
 }
 
+export type JwtExpiresIn = `${number}${'s' | 'm' | 'h' | 'd'}`;
+
+function parseJwtExpiresIn(value: string | undefined): JwtExpiresIn {
+  const expiresIn = value?.trim() || '1h';
+
+  if (!/^\d+[smhd]$/.test(expiresIn)) {
+    throw new Error('JWT_EXPIRES_IN must use a whole number followed by s, m, h, or d.');
+  }
+
+  return expiresIn as JwtExpiresIn;
+}
+
 export const env = {
   port: parsePort(process.env.PORT),
   mongoDbUri: required(process.env.MONGODB_URI, 'MONGODB_URI'),
   mongoDbDnsServer: parseDnsServer(process.env.MONGODB_DNS_SERVER),
+  jwtSecret: required(process.env.JWT_SECRET, 'JWT_SECRET'),
+  jwtExpiresIn: parseJwtExpiresIn(process.env.JWT_EXPIRES_IN),
 };

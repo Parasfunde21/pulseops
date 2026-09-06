@@ -1,2 +1,14 @@
-/** Shared API-local types will be introduced alongside their owning modules. */
+export interface AuthenticatedIdentity {
+  userId: string;
+  organizationId?: string;
+}
+
+declare global {
+  namespace Express {
+    interface Request {
+      auth?: AuthenticatedIdentity;
+    }
+  }
+}
+
 export {};

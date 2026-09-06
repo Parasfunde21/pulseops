@@ -1,2 +1,1 @@
-/** Authentication module boundary; intentionally unimplemented in Milestone 1. */
-export {};
+export { authRouter } from './routes.js';
