@@ -4,6 +4,7 @@ import { requireAuthentication } from '../../middleware/auth.js';
 import { requireOrganizationContext } from '../../middleware/organization-context.js';
 import { requireRole } from '../../middleware/rbac.js';
 import { addMember, listMembers, removeMember, updateMember } from '../memberships/controller.js';
+import { servicesRouter } from '../services/routes.js';
 import { create, get, list } from './controller.js';
 
 const organizationsRouter: Router = Router();
@@ -16,5 +17,6 @@ organizationsRouter.get('/:organizationId/members', requireAuthentication, requi
 organizationsRouter.post('/:organizationId/members', requireAuthentication, requireOrganizationContext, requireRole('admin'), addMember);
 organizationsRouter.patch('/:organizationId/members/:userId', requireAuthentication, requireOrganizationContext, requireRole('admin'), updateMember);
 organizationsRouter.delete('/:organizationId/members/:userId', requireAuthentication, requireOrganizationContext, requireRole('admin'), removeMember);
+organizationsRouter.use('/:organizationId/services', servicesRouter);
 
 export { organizationsRouter };
