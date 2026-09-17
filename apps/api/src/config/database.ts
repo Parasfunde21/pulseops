@@ -4,6 +4,52 @@ import mongoose from 'mongoose';
 
 import { env } from './env.js';
 
+type DiagnosticRecord = Record<string, unknown>;
+
+function asDiagnosticRecord(value: unknown): DiagnosticRecord | undefined {
+  return typeof value === 'object' && value !== null ? (value as DiagnosticRecord) : undefined;
+}
+
+function redactMongoDbUris(value: string): string {
+  return value.replace(/mongodb(?:\+srv)?:\/\/[^\s]+/gi, '[REDACTED_MONGODB_URI]');
+}
+
+function mongoServerSelectionDiagnostics(error: unknown): DiagnosticRecord | undefined {
+  const errorRecord = asDiagnosticRecord(error);
+  const reason = asDiagnosticRecord(errorRecord?.reason);
+  const servers = reason?.servers;
+
+  if (reason === undefined) {
+    return undefined;
+  }
+
+  const serverEntries =
+    servers instanceof Map
+      ? Array.from(servers.entries())
+      : Object.entries(asDiagnosticRecord(servers) ?? {});
+
+  return {
+    type: reason.type,
+    setName: reason.setName,
+    compatible: reason.compatible,
+    stale: reason.stale,
+    logicalSessionTimeoutMinutes: reason.logicalSessionTimeoutMinutes,
+    servers: serverEntries.map(([address, value]) => {
+      const server = asDiagnosticRecord(value);
+      const serverError = asDiagnosticRecord(server?.error);
+
+      return {
+        address,
+        type: server?.type,
+        error: serverError?.message === undefined ? undefined : redactMongoDbUris(String(serverError.message)),
+        roundTripTime: server?.roundTripTime,
+        minWireVersion: server?.minWireVersion,
+        maxWireVersion: server?.maxWireVersion,
+      };
+    }),
+  };
+}
+
 function connectionFailureCategory(error: unknown): string {
   const message = error instanceof Error ? error.message : '';
 
@@ -34,13 +80,17 @@ export async function connectDatabase(): Promise<void> {
   logger.info('Connecting to MongoDB');
 
   try {
-    setServers([env.mongoDbDnsServer]);
+    if (env.mongoDbUri.startsWith('mongodb+srv://')) {
+      setServers([env.mongoDbDnsServer]);
+    }
     await mongoose.connect(env.mongoDbUri);
     logger.info('Connected to MongoDB');
   } catch (error) {
     logger.error('MongoDB connection failed', {
       error: error instanceof Error ? error.name : 'UnknownError',
+      message: redactMongoDbUris(error instanceof Error ? error.message : String(error)),
       category: connectionFailureCategory(error),
+      reason: mongoServerSelectionDiagnostics(error),
     });
     throw error;
   }

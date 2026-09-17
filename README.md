@@ -21,17 +21,20 @@ docs/
 
 - Node.js 20 or later
 - pnpm 9 or later
+- Docker Desktop (for the local MongoDB service)
 
 ## Getting started
 
 ```bash
 pnpm install
 cp .env.example .env
+docker compose up -d mongodb
 pnpm dev
 ```
 
 The web app is served by Vite (normally at `http://localhost:5173`) and the API listens on `http://localhost:4000` by default. Override the API port with `PORT` in `.env`.
 
+When `NODE_ENV=development`, the API uses `MONGODB_LOCAL_URI`, defaulting to `mongodb://127.0.0.1:27017/pulseops` when it is omitted. This keeps an Atlas `MONGODB_URI` in the root `.env` from being selected during local development. Production environments must provide `MONGODB_URI`; Atlas remains supported there. Use `docker compose down` to stop the local MongoDB service.
 ## Commands
 
 ```bash
