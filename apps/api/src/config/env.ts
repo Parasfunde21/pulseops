@@ -53,7 +53,9 @@ function parseJwtExpiresIn(value: string | undefined): JwtExpiresIn {
 
 export const env = {
   port: parsePort(process.env.PORT),
-  mongoDbUri: required(process.env.MONGODB_URI, 'MONGODB_URI'),
+  mongoDbUri: process.env.NODE_ENV === 'development'
+    ? process.env.MONGODB_LOCAL_URI?.trim() || 'mongodb://127.0.0.1:27017/pulseops'
+    : required(process.env.MONGODB_URI, 'MONGODB_URI'),
   mongoDbDnsServer: parseDnsServer(process.env.MONGODB_DNS_SERVER),
   jwtSecret: required(process.env.JWT_SECRET, 'JWT_SECRET'),
   jwtExpiresIn: parseJwtExpiresIn(process.env.JWT_EXPIRES_IN),
