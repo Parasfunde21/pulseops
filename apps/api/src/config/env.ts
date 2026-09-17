@@ -53,6 +53,7 @@ function parseJwtExpiresIn(value: string | undefined): JwtExpiresIn {
 
 export const env = {
   port: parsePort(process.env.PORT),
+  redisUrl: required(process.env.REDIS_URL?.trim() || (process.env.NODE_ENV === 'development' ? 'redis://127.0.0.1:6379' : undefined), 'REDIS_URL'),
   mongoDbUri: process.env.NODE_ENV === 'development'
     ? process.env.MONGODB_LOCAL_URI?.trim() || 'mongodb://127.0.0.1:27017/pulseops'
     : required(process.env.MONGODB_URI, 'MONGODB_URI'),

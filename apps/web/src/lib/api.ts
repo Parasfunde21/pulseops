@@ -42,4 +42,6 @@ export const api = {
   createAlert: (organizationId: string, body: { serviceId: string; fingerprint: string; name: string; severity: Alert['severity']; source: string; startsAt: string; summary?: string; description?: string; labels?: Record<string, string>; annotations?: Record<string, string>; status?: Alert['status'] }) => request<{ alert: Alert }>(orgPath(organizationId, 'alerts'), json(body)),
   alert: (organizationId: string, alertId: string) => request<{ alert: Alert }>(orgPath(organizationId, `alerts/${alertId}`)),
   resolveAlert: (organizationId: string, alertId: string) => request<{ alert: Alert }>(orgPath(organizationId, `alerts/${alertId}/resolve`), json({})),
+  enqueueHealthCheck: () => request<{ message: string; jobId: string }>('/jobs/health-check', json({})),
+  jobStatus: (jobId: string) => request<{ id: string; name: string; state: string; progress: number | object; createdAt: string; processedAt?: string; finishedAt?: string; failedReason?: string; result?: { mongo: 'ok'; redis: 'ok'; checkedAt: string } }>(`/jobs/${jobId}`),
 };
