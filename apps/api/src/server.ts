@@ -4,7 +4,9 @@ import { logger } from '@pulseops/logger';
 
 import { createApp } from './app.js';
 import { connectDatabase, disconnectDatabase } from './config/database.js';
+import { connectRedis, disconnectRedis } from './config/redis.js';
 import { env } from './config/env.js';
+import { closeJobsQueue } from './modules/jobs/queue.js';
 
 function closeServer(server: Server): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -31,6 +33,8 @@ async function shutdown(signal: string, httpServer: Server): Promise<void> {
 
   try {
     await closeServer(httpServer);
+    await closeJobsQueue();
+    await disconnectRedis();
     await disconnectDatabase();
     logger.info('API server stopped');
   } catch (error) {
@@ -44,6 +48,7 @@ async function shutdown(signal: string, httpServer: Server): Promise<void> {
 async function startServer(): Promise<void> {
   try {
     await connectDatabase();
+    await connectRedis();
 
     const server = createApp().listen(env.port, () => {
       logger.info('API server started', { port: env.port });

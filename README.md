@@ -56,6 +56,20 @@ pnpm format:check   # verify formatting
 }
 ```
 
+## Redis and BullMQ
+
+Phase 8 adds Redis as the BullMQ transport while MongoDB remains the primary application database. The API enqueues `system.health-check` jobs on `pulseops-jobs`; the separate worker consumes them and verifies MongoDB and Redis reachability. Jobs retry up to three times with exponential backoff and retain a bounded history of completed and failed jobs.
+
+Start local infrastructure with `docker compose up -d`, then start the API and worker in separate terminals:
+
+```bash
+pnpm --filter @pulseops/api build
+pnpm --filter @pulseops/api start
+pnpm --filter @pulseops/api worker
+```
+
+An authenticated `POST /jobs/health-check` returns `202` and a job ID. Poll `GET /jobs/:jobId` to inspect its state and the completed MongoDB/Redis result.
+
 ## Current scope
 
 This foundation deliberately does not include authentication, persistence, queues, AI features, cloud provisioning, containerization, monitoring integrations, or external product integrations. Those will be added incrementally as their product boundaries are defined.

@@ -8,5 +8,20 @@ services:
     volumes:
       - pulseops-mongodb-data:/data/db
 
+  redis:
+    image: redis:7-alpine
+    container_name: pulseops-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - pulseops-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
 volumes:
   pulseops-mongodb-data:
+  pulseops-redis-data:
