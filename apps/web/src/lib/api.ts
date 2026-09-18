@@ -1,4 +1,4 @@
-import type { Alert, AuthResult, Incident, Membership, Organization, Service, User } from '../types/api';
+import type { Alert, AuthResult, Incident, IncidentAnalysis, Membership, Organization, Service, User } from '../types/api';
 import { storage } from './storage';
 
 const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:4000').replace(/\/$/, '');
@@ -38,6 +38,8 @@ export const api = {
   incident: (organizationId: string, incidentId: string) => request<{ incident: Incident }>(orgPath(organizationId, `incidents/${incidentId}`)),
   updateIncident: (organizationId: string, incidentId: string, body: Partial<Incident>) => request<{ incident: Incident }>(orgPath(organizationId, `incidents/${incidentId}`), { method: 'PATCH', body: JSON.stringify(body) }),
   incidentAction: (organizationId: string, incidentId: string, action: 'acknowledge' | 'resolve' | 'reopen') => request<{ incident: Incident }>(orgPath(organizationId, `incidents/${incidentId}/${action}`), json({})),
+  incidentAnalysis: (organizationId: string, incidentId: string) => request<{ analysis: IncidentAnalysis | null; history: IncidentAnalysis[] }>(orgPath(organizationId, `incidents/${incidentId}/analysis`)),
+  requestIncidentAnalysis: (organizationId: string, incidentId: string) => request<{ message: string; jobId: string; incidentId: string }>(orgPath(organizationId, `incidents/${incidentId}/analysis`), json({})),
   alerts: (organizationId: string, filters?: { status?: string; severity?: string; source?: string }) => request<{ alerts: Alert[] }>(`${orgPath(organizationId, 'alerts')}${filters ? `?${new URLSearchParams(Object.entries(filters).filter(([, value]) => Boolean(value)))}` : ''}`),
   createAlert: (organizationId: string, body: { serviceId: string; fingerprint: string; name: string; severity: Alert['severity']; source: string; startsAt: string; summary?: string; description?: string; labels?: Record<string, string>; annotations?: Record<string, string>; status?: Alert['status'] }) => request<{ alert: Alert }>(orgPath(organizationId, 'alerts'), json(body)),
   alert: (organizationId: string, alertId: string) => request<{ alert: Alert }>(orgPath(organizationId, `alerts/${alertId}`)),
