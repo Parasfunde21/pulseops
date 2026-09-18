@@ -63,4 +63,8 @@ export const env = {
   githubApiUrl: process.env.GITHUB_API_URL?.trim() || 'https://api.github.com',
   githubToken: process.env.GITHUB_TOKEN?.trim() || undefined,
   githubWebhookSecret: process.env.GITHUB_WEBHOOK_SECRET?.trim() || undefined,
+  aiProvider: process.env.AI_PROVIDER?.trim() || 'mock',
+  aiApiUrl: process.env.AI_API_URL?.trim() || undefined,
+  aiApiKey: process.env.AI_API_KEY?.trim() || undefined,
+  aiModel: process.env.AI_MODEL?.trim() || 'pulseops-incident-analyst',
 };

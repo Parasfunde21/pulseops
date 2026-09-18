@@ -1,6 +1,9 @@
 import type { RequestHandler } from 'express';
 import { isValidObjectId } from 'mongoose';
 
+import { jobsQueue } from '../jobs/queue.js';
+import { incidentAiAnalysisJobName, type IncidentAiAnalysisJobData } from '../jobs/types.js';
+import { incidentAnalysisHistory, incidentAnalysisResponse, latestIncidentAnalysis } from './analysis.js';
 import type { IncidentDocument, IncidentPriority, IncidentSeverity, IncidentStatus } from './index.js';
 import {
   acknowledgeIncident, createIncident, incidentForOrganization, incidentResponse, incidentsForOrganization,
@@ -99,6 +102,37 @@ export const get: RequestHandler = async (request, response, next) => {
   if (incidentId(request) === null) return notFound(response);
   try { const incident = await load(request); if (incident === null) return notFound(response); response.status(200).json({ incident: incidentResponse(incident) }); }
   catch (error) { next(error); }
+};
+
+export const getAnalysis: RequestHandler = async (request, response, next) => {
+  if (incidentId(request) === null) return notFound(response);
+  try {
+    const incident = await load(request);
+    if (incident === null) return notFound(response);
+    const [latest, history] = await Promise.all([
+      latestIncidentAnalysis(request.organization!.organizationId, incident.id),
+      incidentAnalysisHistory(request.organization!.organizationId, incident.id),
+    ]);
+    response.status(200).json({
+      analysis: latest === null ? null : incidentAnalysisResponse(latest),
+      history: history.map(incidentAnalysisResponse),
+    });
+  } catch (error) { next(error); }
+};
+
+export const requestAnalysis: RequestHandler = async (request, response, next) => {
+  if (incidentId(request) === null) return notFound(response);
+  try {
+    const incident = await load(request);
+    if (incident === null) return notFound(response);
+    const data: IncidentAiAnalysisJobData = {
+      organizationId: request.organization!.organizationId,
+      incidentId: incident.id,
+      requestedAt: new Date().toISOString(),
+    };
+    const job = await jobsQueue.add(incidentAiAnalysisJobName, data);
+    response.status(202).json({ message: 'Incident analysis queued', jobId: job.id, incidentId: incident.id });
+  } catch (error) { next(error); }
 };
 
 export const update: RequestHandler = async (request, response, next) => {

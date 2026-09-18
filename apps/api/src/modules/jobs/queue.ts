@@ -4,6 +4,7 @@ import { getRedisClient } from '../../config/redis.js';
 import {
   githubWebhookJobName,
   healthCheckJobName,
+  incidentAiAnalysisJobName,
   type PulseOpsJobData,
   type PulseOpsJobResult,
 } from './types.js';
@@ -25,4 +26,4 @@ export async function closeJobsQueue(): Promise<void> {
   await jobsQueue.close();
 }
 
-export { githubWebhookJobName, healthCheckJobName };
+export { githubWebhookJobName, healthCheckJobName, incidentAiAnalysisJobName };

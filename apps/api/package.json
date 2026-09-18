@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.json",
-    "test": "node --import tsx --test src/integrations/github/github.integration.test.ts src/modules/jobs/worker.test.ts src/routes/webhooks.test.ts",
+    "test": "node --import tsx --test src/integrations/github/github.integration.test.ts src/modules/incidents/analysis.test.ts src/modules/jobs/worker.test.ts src/routes/webhooks.test.ts",
     "start": "node dist/server.js",
     "worker": "node dist/worker.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"

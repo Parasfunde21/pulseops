@@ -1,5 +1,6 @@
 export const healthCheckJobName = 'system.health-check' as const;
 export const githubWebhookJobName = 'github.webhook' as const;
+export const incidentAiAnalysisJobName = 'incident.ai-analysis' as const;
 
 export interface HealthCheckJobData {
   requestedAt: string;
@@ -10,9 +11,6 @@ export interface HealthCheckJobResult {
   redis: 'ok';
   checkedAt: string;
 }
-
-export type PulseOpsJobData = HealthCheckJobData | GitHubWebhookJobData;
-export type PulseOpsJobResult = HealthCheckJobResult | GitHubWebhookJobResult;
 
 export interface GitHubWebhookJobData {
   organizationId: string;
@@ -37,3 +35,19 @@ export interface GitHubWebhookJobResult {
   acceptedAt: string;
   status: 'accepted' | 'ignored';
 }
+
+export interface IncidentAiAnalysisJobData {
+  organizationId: string;
+  incidentId: string;
+  requestedAt: string;
+}
+
+export interface IncidentAiAnalysisJobResult {
+  analysisId: string;
+  incidentId: string;
+  generatedAt: string;
+  status: 'completed';
+}
+
+export type PulseOpsJobData = HealthCheckJobData | GitHubWebhookJobData | IncidentAiAnalysisJobData;
+export type PulseOpsJobResult = HealthCheckJobResult | GitHubWebhookJobResult | IncidentAiAnalysisJobResult;

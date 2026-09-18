@@ -7,11 +7,15 @@ import { isDatabaseReachable } from '../../config/database.js';
 import { getRedisClient, isRedisReachable } from '../../config/redis.js';
 import { parseGithubRepositoryUrl, type GitHubRepositoryReference } from '../../integrations/github/index.js';
 import { ServiceModel } from '../../modules/services/index.js';
+import { processIncidentAnalysis } from '../incidents/analysis.js';
 import {
   githubWebhookJobName,
   healthCheckJobName,
+  incidentAiAnalysisJobName,
   type GitHubWebhookJobData,
   type GitHubWebhookJobResult,
+  type IncidentAiAnalysisJobData,
+  type IncidentAiAnalysisJobResult,
   type HealthCheckJobData,
   type HealthCheckJobResult,
   type PulseOpsJobData,
@@ -72,6 +76,17 @@ async function handleGitHubWebhookJob(job: Job<PulseOpsJobData, PulseOpsJobResul
   return result;
 }
 
+async function handleIncidentAiAnalysisJob(job: Job<PulseOpsJobData, PulseOpsJobResult>): Promise<IncidentAiAnalysisJobResult> {
+  const payload = job.data as IncidentAiAnalysisJobData;
+  const analysis = await processIncidentAnalysis(payload.organizationId, payload.incidentId);
+  return {
+    analysisId: analysis.id,
+    incidentId: payload.incidentId,
+    generatedAt: analysis.generatedAt.toISOString(),
+    status: 'completed',
+  };
+}
+
 export function githubWebhookServiceFilter(organizationId: string, repositoryReference: GitHubRepositoryReference) {
   return {
     organizationId: new Types.ObjectId(organizationId),
@@ -113,6 +128,10 @@ export function createJobsWorker(): Worker<PulseOpsJobData, PulseOpsJobResult> {
 
       if (job.name === githubWebhookJobName) {
         return await handleGitHubWebhookJob(job);
+      }
+
+      if (job.name === incidentAiAnalysisJobName) {
+        return await handleIncidentAiAnalysisJob(job);
       }
 
       throw new Error(`Unsupported job name: ${job.name}`);
