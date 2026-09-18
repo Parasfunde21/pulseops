@@ -60,4 +60,7 @@ export const env = {
   mongoDbDnsServer: parseDnsServer(process.env.MONGODB_DNS_SERVER),
   jwtSecret: required(process.env.JWT_SECRET, 'JWT_SECRET'),
   jwtExpiresIn: parseJwtExpiresIn(process.env.JWT_EXPIRES_IN),
+  githubApiUrl: process.env.GITHUB_API_URL?.trim() || 'https://api.github.com',
+  githubToken: process.env.GITHUB_TOKEN?.trim() || undefined,
+  githubWebhookSecret: process.env.GITHUB_WEBHOOK_SECRET?.trim() || undefined,
 };

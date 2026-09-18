@@ -1,9 +1,14 @@
 import { Queue } from 'bullmq';
 
 import { getRedisClient } from '../../config/redis.js';
-import { healthCheckJobName, type HealthCheckJobData, type HealthCheckJobResult } from './types.js';
+import {
+  githubWebhookJobName,
+  healthCheckJobName,
+  type PulseOpsJobData,
+  type PulseOpsJobResult,
+} from './types.js';
 
-export const jobsQueue = new Queue<HealthCheckJobData, HealthCheckJobResult>(
+export const jobsQueue = new Queue<PulseOpsJobData, PulseOpsJobResult>(
   'pulseops-jobs',
   {
     connection: getRedisClient(),
@@ -20,4 +25,4 @@ export async function closeJobsQueue(): Promise<void> {
   await jobsQueue.close();
 }
 
-export { healthCheckJobName };
+export { githubWebhookJobName, healthCheckJobName };

@@ -70,6 +70,24 @@ pnpm --filter @pulseops/api worker
 
 An authenticated `POST /jobs/health-check` returns `202` and a job ID. Poll `GET /jobs/:jobId` to inspect its state and the completed MongoDB/Redis result.
 
+## GitHub integration
+
+PulseOps includes a scoped GitHub integration layer that keeps the rest of the application architecture intact while adding repository inspection and webhook-driven updates.
+
+- `GET /organizations/:organizationId/services/:serviceId/github` validates a GitHub repository URL and returns safe metadata for the repository and recent commits from the GitHub REST API.
+- GitHub webhooks are accepted through `POST /webhooks/github/:organizationId`, verified with `X-Hub-Signature-256`, and filtered to supported event types (`push`, `deployment`, and `deployment_status`). Configure each GitHub webhook URL with the PulseOps organization ID. The legacy unscoped `POST /webhooks/github` route rejects queueable events because it cannot establish tenant context.
+- Validated webhook events are queued through BullMQ and processed by the worker to match the service registry by repository URL and emit a structured job result without exposing any secrets.
+
+Set the following environment variables in `.env` when enabling the feature:
+
+```bash
+GITHUB_API_URL=https://api.github.com
+GITHUB_TOKEN=ghp_xxx
+GITHUB_WEBHOOK_SECRET=replace-with-your-github-webhook-secret
+```
+
+Use a token with the minimum required repository access, and keep the webhook secret in the server environment only. Never expose it in client code or logs.
+
 ## Current scope
 
 This foundation deliberately does not include authentication, persistence, queues, AI features, cloud provisioning, containerization, monitoring integrations, or external product integrations. Those will be added incrementally as their product boundaries are defined.

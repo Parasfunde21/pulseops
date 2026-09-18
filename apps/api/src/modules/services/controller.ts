@@ -1,6 +1,8 @@
 import type { RequestHandler } from 'express';
 import { isValidObjectId } from 'mongoose';
 
+import { getRepositoryMetadata, GitHubApiError } from '../../integrations/github/client.js';
+import { parseGithubRepositoryUrl } from '../../integrations/github/index.js';
 import { slugFromName } from '../organizations/service.js';
 import type { ServiceStatus } from './index.js';
 import {
@@ -94,6 +96,46 @@ export const update: RequestHandler = async (request, response, next) => {
     response.status(200).json({ service: serviceResponse(await updateService(service, input)) });
   } catch (error) {
     if (error instanceof ServiceSlugAlreadyExistsError) return void response.status(409).json({ error: 'Service slug is already in use.' });
+    next(error);
+  }
+};
+
+export const githubRepository: RequestHandler = async (request, response, next) => {
+  const id = serviceId(request);
+  if (id === null) return notFound(response);
+
+  try {
+    const service = await serviceForOrganization(request.organization!.organizationId, id);
+    if (service === null) return notFound(response);
+    if (service.repositoryUrl === undefined || service.repositoryUrl.trim() === '') {
+      response.status(400).json({ error: 'This service does not have a repository URL configured.' });
+      return;
+    }
+
+    const repositoryReference = parseGithubRepositoryUrl(service.repositoryUrl);
+    if (repositoryReference === null) {
+      response.status(400).json({ error: 'Repository URL must point to a valid GitHub repository.' });
+      return;
+    }
+
+    const repository = await getRepositoryMetadata(repositoryReference.owner, repositoryReference.repo);
+    response.status(200).json({
+      repository: {
+        fullName: repository.fullName,
+        private: repository.private,
+        defaultBranch: repository.defaultBranch,
+        htmlUrl: repository.htmlUrl,
+        description: repository.description,
+        stars: repository.stars,
+        openIssues: repository.openIssues,
+      },
+    });
+  } catch (error) {
+    if (error instanceof GitHubApiError) {
+      response.status(error.status === 404 ? 404 : 502).json({ error: 'GitHub repository could not be retrieved.' });
+      return;
+    }
+
     next(error);
   }
 };
