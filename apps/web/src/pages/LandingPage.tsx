@@ -1,0 +1,43 @@
+import { Link, Navigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import './LandingPage.css';
+import './PhaseA.css';
+
+const features = [
+  ['Intelligent Alerting', 'Receive and correlate operational signals without losing the context.'],
+  ['Incident Management', 'Track severity, ownership, acknowledgement, investigation, resolution, and reopening.'],
+  ['AI Incident Analyst', 'Generate evidence-backed investigation summaries while keeping humans in control.'],
+  ['GitHub Integration', 'Connect repository activity, deployments, and webhook events to operational context.'],
+  ['Observability', 'Expose Prometheus metrics and visualize service health through Grafana.'],
+  ['Production Engineering', 'Redis, BullMQ, Docker, health checks, CI/CD, RBAC, and tenant isolation.'],
+];
+
+const flow = [
+  ['ALERT', 'Capture the first operational signal.'],
+  ['CORRELATE', 'Join related context across services and activity.'],
+  ['INCIDENT', 'Create a shared, accountable response surface.'],
+  ['AI INVESTIGATION', 'Turn bounded evidence into advisory hypotheses.'],
+  ['ENGINEER ACTION', 'Keep decisions and changes with the team.'],
+  ['RESOLUTION', 'Close the loop with a complete timeline.'],
+];
+
+const technology = [
+  ['Frontend', 'React - TypeScript - Vite'], ['Backend', 'Node.js - Express - MongoDB'],
+  ['Async processing', 'Redis - BullMQ'], ['AI', 'Provider abstraction - Incident Analyst'],
+  ['Integrations', 'GitHub Webhooks'], ['Observability', 'Prometheus - Grafana'],
+  ['Delivery', 'Docker - GitHub Actions'], ['Security', 'JWT - RBAC - Multi-tenancy'],
+];
+
+function Brand() {
+  return <span className="landing-brand"><span className="landing-brand-mark">P</span><span>Pulse<span className="brand-accent">Ops</span></span></span>;
+}
+
+function Preview() {
+  return <div className="preview-wrap"><div className="preview-label">STATIC PRODUCT PREVIEW <span>NOT LIVE DATA</span></div><div className="preview-window"><div className="preview-topbar"><span>PulseOps / incident INC-2048</span><span className="preview-live">SIMULATION</span></div><div className="preview-body"><aside className="preview-nav"><strong>PulseOps</strong><span className="preview-nav-active">Overview</span><span>Incidents</span><span>Services</span><span>Signals</span></aside><div className="preview-content"><div className="preview-heading"><div><small>INCIDENT DETAIL / SEV-2</small><h3>Checkout latency elevated</h3><span className="preview-status">INVESTIGATING</span></div><span className="preview-service">payments-api</span></div><div className="preview-grid"><div className="preview-card preview-chart"><small>LATENCY / 15 MIN</small><strong>842 <em>ms</em></strong><svg viewBox="0 0 300 80" preserveAspectRatio="none"><path d="M0 65 C25 62 38 67 52 55 S75 57 90 52 S110 59 126 45 S145 51 158 44 S176 50 190 25 S205 40 220 18 S242 35 260 10 S280 28 300 8" /></svg></div><div className="preview-card confidence"><small>AI INVESTIGATION</small><h4>Evidence-backed advisory</h4><p>Deployment activity overlaps with the latency increase.</p><div className="confidence-meter"><span /></div><div className="confidence-foot"><span>CONFIDENCE</span><strong>78%</strong></div></div></div><div className="preview-card timeline"><small>OPERATIONAL TIMELINE</small><div><b>14:18</b><span>Signal correlated with checkout service</span></div><div><b>14:12</b><span>Deployment release-4f2a completed</span></div><div><b>14:06</b><span>Latency threshold crossed</span></div></div></div></div></div></div>;
+}
+
+export function LandingPage() {
+  const { token } = useAuth();
+  if (token) return <Navigate to="/dashboard" replace />;
+  return <main className="landing-page"><header className="landing-header"><Link to="/" aria-label="PulseOps home"><Brand /></Link><nav className="landing-nav"><a href="#capabilities">Capabilities</a><a href="#how-it-works">How it works</a><a href="#technology">Technology</a></nav><div className="landing-access"><Link className="landing-signin landing-signin-muted" to="/login">Sign in</Link><Link className="landing-signin" to="/register">Get started</Link></div></header><section className="landing-hero"><div className="hero-copy"><div className="signal-eyebrow"><span className="signal-ping" />AI-POWERED DEVOPS INTELLIGENCE</div><h1>See the signal.<br /><span>Understand the incident.</span><br />Restore service.</h1><p>PulseOps is an incident management and investigation platform for engineering teams. Connect services, receive alerts, investigate with AI, and resolve incidents with context.</p><div className="hero-actions"><Link className="hero-cta" to="/register">Get Started</Link><a className="hero-secondary" href="#how-it-works">Explore how it works</a></div><div className="hero-strip"><span>Designed for incident response</span><i /><span>AI-assisted</span><i /><span>Human controlled</span></div></div><Preview /></section><section className="landing-section capability-section" id="capabilities"><div className="section-kicker">01 / THE CONTROL PLANE</div><h2>One control plane for the<br /><span>entire incident lifecycle.</span></h2><p className="section-intro">Connect a service, receive alerts, create incidents, investigate with AI, and resolve problems without losing the operational story.</p><div className="feature-grid">{features.map(([title, text], index) => <article className="feature-card" key={title}><div className="feature-top"><span className="feature-number">0{index + 1}</span><span className="feature-icon">{['~', '+', '*', '/', '#', '盾'][index]}</span></div><h3>{title}</h3><p>{text}</p></article>)}</div></section><section className="landing-section flow-section"><div className="section-kicker">02 / THE RESPONSE LOOP</div><h2>From signal to <span>resolution.</span></h2><div className="flow-track">{flow.map(([title, text], index) => <div className="flow-step" key={title}><div className="flow-node">{String(index + 1).padStart(2, '0')}</div><div><small>{title}</small><p>{text}</p></div></div>)}</div></section><section className="landing-section walkthrough-section" id="how-it-works"><div className="section-kicker">03 / IMPLEMENTATION WALKTHROUGH</div><div className="walkthrough-heading"><h2>Built to fit the way<br /><span>engineers operate.</span></h2><p>Start with the systems you already own. PulseOps adds a deliberate response layer without hiding the details that make production understandable.</p></div><div className="walkthrough-list">{['Connect your services', 'Receive alerts and GitHub events', 'Automatically correlate signals into incidents', 'Ask the AI Incident Analyst for investigation support', 'Resolve with a complete operational timeline'].map((step, index) => <div className="walkthrough-step" key={step}><span>0{index + 1}</span><strong>{step}</strong></div>)}</div></section><section className="landing-section technology-section" id="technology"><div className="section-kicker">04 / THE STACK</div><h2>Built like an <span>engineering system.</span></h2><div className="tech-grid">{technology.map(([label, value]) => <div className="tech-item" key={label}><small>{label}</small><strong>{value}</strong></div>)}</div></section><section className="control-section"><div className="control-orbit"><span /><span /><span /></div><div className="section-kicker">05 / HUMAN CONTROL</div><h2>AI assists.<br /><span>Engineers decide.</span></h2><p>PulseOps AI analysis is advisory. It helps teams organize evidence and explore root-cause hypotheses, but it never autonomously performs destructive production actions.</p><div className="control-points"><span>Organization-scoped access</span><span>RBAC enforcement</span><span>Signed GitHub webhooks</span><span>Bounded AI context</span><span>Secrets kept server-side</span></div></section><section className="final-cta"><div className="section-kicker">06 / READY WHEN YOU ARE</div><h2>Your next incident shouldn't become<br /><span>your next fire drill.</span></h2><p>Enter the PulseOps operations center and see the system in action.</p><Link className="hero-cta" to="/register">Get Started</Link></section><footer className="landing-footer"><div><Link to="/" className="footer-brand"><Brand /></Link><p>AI-powered DevOps incident intelligence.</p><small>Built as an engineering portfolio project.</small></div><div className="footer-links"><div><b>Product</b><a href="#capabilities">Overview</a><a href="#how-it-works">How it works</a><a href="#capabilities">Features</a></div><div><b>Engineering</b><a href="#technology">Architecture</a><a href="#technology">Observability</a><a href="#technology">CI/CD</a></div><div><b>Access</b><Link to="/login">Sign in</Link><Link to="/register">Get started</Link></div></div></footer></main>;
+}
