@@ -1,0 +1,48 @@
+{
+  "uid": "pulseops-observability",
+  "title": "PulseOps Observability",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "15s",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Request rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [{ "expr": "sum(rate(http_requests_total[5m]))", "legendFormat": "requests/sec" }]
+    },
+    {
+      "id": 2,
+      "title": "Error rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [{ "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m]))", "legendFormat": "5xx/sec" }]
+    },
+    {
+      "id": 3,
+      "title": "Request latency p95",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p95 seconds" }]
+    },
+    {
+      "id": 4,
+      "title": "Job throughput and failures",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        { "expr": "sum(rate(bullmq_jobs_total{status=\"completed\"}[5m]))", "legendFormat": "completed/sec" },
+        { "expr": "sum(rate(bullmq_jobs_total{status=\"failed\"}[5m]))", "legendFormat": "failed/sec" }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "API readiness",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 16 },
+      "targets": [{ "expr": "pulseops_readiness", "legendFormat": "ready" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    }
+  ]
+}

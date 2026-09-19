@@ -1,6 +1,7 @@
 import { Router, type RequestHandler } from 'express';
 
 import { requireAuthentication } from '../../middleware/auth.js';
+import { recordJobQueued } from '../../observability/metrics.js';
 import { jobsQueue } from './queue.js';
 import { healthCheckJobName, type HealthCheckJobData } from './types.js';
 
@@ -26,6 +27,7 @@ export const jobsRouter = (() => {
         healthCheckJobName,
         { requestedAt: new Date().toISOString() } satisfies HealthCheckJobData,
       );
+      recordJobQueued(healthCheckJobName);
       response.status(202).json({ message: 'Health check job queued', jobId: job.id });
     } catch (error) {
       next(error);

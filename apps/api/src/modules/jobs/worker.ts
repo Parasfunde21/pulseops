@@ -7,6 +7,7 @@ import { isDatabaseReachable } from '../../config/database.js';
 import { getRedisClient, isRedisReachable } from '../../config/redis.js';
 import { parseGithubRepositoryUrl, type GitHubRepositoryReference } from '../../integrations/github/index.js';
 import { ServiceModel } from '../../modules/services/index.js';
+import { recordJobCompleted, recordJobFailed } from '../../observability/metrics.js';
 import { processIncidentAnalysis } from '../incidents/analysis.js';
 import {
   githubWebhookJobName,
@@ -123,15 +124,20 @@ export function createJobsWorker(): Worker<PulseOpsJobData, PulseOpsJobResult> {
           checkedAt: new Date().toISOString(),
         };
         logger.info('Background job completed', { jobId: job.id, name: job.name, requestedAt: data.requestedAt });
+        recordJobCompleted(job.name);
         return result;
       }
 
       if (job.name === githubWebhookJobName) {
-        return await handleGitHubWebhookJob(job);
+        const result = await handleGitHubWebhookJob(job);
+        recordJobCompleted(job.name);
+        return result;
       }
 
       if (job.name === incidentAiAnalysisJobName) {
-        return await handleIncidentAiAnalysisJob(job);
+        const result = await handleIncidentAiAnalysisJob(job);
+        recordJobCompleted(job.name);
+        return result;
       }
 
       throw new Error(`Unsupported job name: ${job.name}`);
@@ -140,6 +146,7 @@ export function createJobsWorker(): Worker<PulseOpsJobData, PulseOpsJobResult> {
   );
 
   worker.on('failed', (job, error) => {
+    if (job !== undefined) recordJobFailed(job.name);
     logger.error('Background job failed', {
       jobId: job?.id,
       name: job?.name,
