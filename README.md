@@ -21,7 +21,7 @@ docs/
 
 - Node.js 20 or later
 - pnpm 9 or later
-- Docker Desktop (for the local MongoDB service)
+- Docker Desktop (for local infrastructure and observability)
 
 ## Getting started
 
@@ -88,6 +88,23 @@ GITHUB_WEBHOOK_SECRET=replace-with-your-github-webhook-secret
 
 Use a token with the minimum required repository access, and keep the webhook secret in the server environment only. Never expose it in client code or logs.
 
+## Local observability
+
+Set `JWT_SECRET` in `.env` before starting the full Compose stack, then run:
+
+```bash
+docker compose up -d
+```
+
+The API exposes `GET /ready` for readiness checks of MongoDB and Redis, and `GET /metrics` in Prometheus text exposition format. Prometheus scrapes the API every 15 seconds. Grafana is provisioned with a PulseOps dashboard covering request rate, 5xx error rate, p95 latency, BullMQ throughput/failures, and API readiness.
+
+- Grafana: `http://localhost:3000`
+- Prometheus: `http://localhost:9090`
+- API metrics: `http://localhost:4000/metrics`
+- API readiness: `http://localhost:4000/ready`
+
+The API logs structured method, route, status, duration, and request ID fields. Authorization headers, cookies, bodies, tokens, and secrets are excluded. Metrics use only bounded method, route, status, job name, and job status labels.
+
 ## Current scope
 
-This foundation deliberately does not include authentication, persistence, queues, AI features, cloud provisioning, containerization, monitoring integrations, or external product integrations. Those will be added incrementally as their product boundaries are defined.
+This foundation includes authentication, persistence, queues, AI features, GitHub integration, and lightweight local observability. Cloud provisioning and external monitoring integrations remain outside the current scope.

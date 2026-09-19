@@ -2,6 +2,7 @@ import type { RequestHandler } from 'express';
 import { isValidObjectId } from 'mongoose';
 
 import { jobsQueue } from '../jobs/queue.js';
+import { recordJobQueued } from '../../observability/metrics.js';
 import { incidentAiAnalysisJobName, type IncidentAiAnalysisJobData } from '../jobs/types.js';
 import { incidentAnalysisHistory, incidentAnalysisResponse, latestIncidentAnalysis } from './analysis.js';
 import type { IncidentDocument, IncidentPriority, IncidentSeverity, IncidentStatus } from './index.js';
@@ -131,6 +132,7 @@ export const requestAnalysis: RequestHandler = async (request, response, next) =
       requestedAt: new Date().toISOString(),
     };
     const job = await jobsQueue.add(incidentAiAnalysisJobName, data);
+    recordJobQueued(incidentAiAnalysisJobName);
     response.status(202).json({ message: 'Incident analysis queued', jobId: job.id, incidentId: incident.id });
   } catch (error) { next(error); }
 };

@@ -4,6 +4,7 @@ import type { Queue } from 'bullmq';
 
 import { env } from '../config/env.js';
 import { parseGithubRepositoryUrl, verifyGithubSignature } from '../integrations/github/index.js';
+import { recordJobQueued } from '../observability/metrics.js';
 import { githubWebhookJobName, jobsQueue } from '../modules/jobs/queue.js';
 import type { GitHubWebhookJobData, PulseOpsJobData, PulseOpsJobResult } from '../modules/jobs/types.js';
 
@@ -121,6 +122,7 @@ export function createGithubWebhookHandler(queue: WebhookQueue): RequestHandler 
     const job = await queue.add(githubWebhookJobName, jobPayload, {
       jobId: `github-${organizationId}-${(deliveryId ?? `manual-${Date.now()}`).replace(/[^A-Za-z0-9_-]/g, '_')}`,
     });
+    recordJobQueued(githubWebhookJobName);
     response.status(202).json({ accepted: true, jobId: job.id, event: eventType });
   } catch (error) {
     next(error);
