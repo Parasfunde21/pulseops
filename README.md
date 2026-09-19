@@ -105,6 +105,26 @@ The API exposes `GET /ready` for readiness checks of MongoDB and Redis, and `GET
 
 The API logs structured method, route, status, duration, and request ID fields. Authorization headers, cookies, bodies, tokens, and secrets are excluded. Metrics use only bounded method, route, status, job name, and job status labels.
 
+## CI/CD
+
+GitHub Actions runs on pull requests and pushes to `main`. CI installs the locked pnpm workspace dependencies, then runs repository lint, typecheck, tests, production builds, Docker Compose configuration validation, and an API Docker image build. The image is built locally in CI as `pulseops-api:ci` and is not pushed to a registry.
+
+To build and run the production API image locally, provide the required runtime environment variables through your shell or an ignored `.env` file, then run:
+
+```bash
+docker build -f apps/api/Dockerfile -t pulseops-api:local .
+docker run --rm -p 4000:4000 --env-file .env pulseops-api:local
+```
+
+For local deployment with MongoDB, Redis, Prometheus, Grafana, and the API, use Docker Compose:
+
+```bash
+docker compose up -d
+docker compose ps
+```
+
+The API requires a JWT signing secret and runtime connection settings for MongoDB and Redis. Optional GitHub and AI integration settings can be supplied through environment variables when those integrations are enabled. Do not commit credentials or secret values.
+
 ## Current scope
 
 This foundation includes authentication, persistence, queues, AI features, GitHub integration, and lightweight local observability. Cloud provisioning and external monitoring integrations remain outside the current scope.
