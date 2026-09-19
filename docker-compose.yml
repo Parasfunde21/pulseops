@@ -13,6 +13,11 @@ services:
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env before starting the API container}
     ports:
       - "4000:4000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('node:http').get('http://127.0.0.1:4000/health', response => process.exit(response.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
     depends_on:
       - mongodb
       - redis
