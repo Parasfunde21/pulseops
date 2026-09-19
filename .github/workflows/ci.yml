@@ -24,7 +24,14 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
-      - run: pnpm test
+      - run: pnpm --filter @pulseops/api... build
+      - name: Run tests
+        env:
+          NODE_ENV: test
+          REDIS_URL: redis://127.0.0.1:6379
+          MONGODB_URI: mongodb://127.0.0.1:27017/pulseops-test
+          JWT_SECRET: ci-test-secret
+        run: pnpm test
       - run: pnpm build
       - name: Validate Docker Compose configuration
         env:
