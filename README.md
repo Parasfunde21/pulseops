@@ -125,6 +125,15 @@ docker compose ps
 
 The API requires a JWT signing secret and runtime connection settings for MongoDB and Redis. Optional GitHub and AI integration settings can be supplied through environment variables when those integrations are enabled. Do not commit credentials or secret values.
 
+## Getting Started as a New User
+
+1. Open PulseOps and select **Get started**.
+2. Create an account.
+3. Create a workspace for your engineering team.
+4. Add your first service.
+5. Open the dashboard.
+6. Generate and manage incidents using the existing operational workflows.
+
 ## Current scope
 
 This foundation includes authentication, persistence, queues, AI features, GitHub integration, and lightweight local observability. Cloud provisioning and external monitoring integrations remain outside the current scope.

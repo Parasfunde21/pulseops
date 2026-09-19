@@ -28,9 +28,11 @@ const json = (body: unknown): RequestInit => ({ method: 'POST', body: JSON.strin
 const orgPath = (organizationId: string, resource: string) => `/organizations/${organizationId}/${resource}`;
 
 export const api = {
+  register: (name: string, email: string, password: string) => request<AuthResult>('/auth/register', json({ name, email, password })),
   login: (email: string, password: string) => request<AuthResult>('/auth/login', json({ email, password })),
   me: () => request<{ user: User }>('/auth/me'),
   organizations: () => request<{ organizations: Organization[] }>('/organizations'),
+  createOrganization: (name: string) => request<{ organization: Organization }>('/organizations', json({ name })),
   members: (organizationId: string) => request<{ members: Membership[] }>(orgPath(organizationId, 'members')),
   services: (organizationId: string) => request<{ services: Service[] }>(orgPath(organizationId, 'services')),
   createService: (organizationId: string, body: { name: string; slug?: string | undefined; description?: string | undefined; repositoryUrl?: string | undefined; environment?: string | undefined; teamName?: string | undefined; status?: Service['status'] | undefined }) => request<{ service: Service }>(orgPath(organizationId, 'services'), json(body)),
